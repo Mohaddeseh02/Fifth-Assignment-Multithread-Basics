@@ -20,6 +20,7 @@ public class MatrixMultiplication {
             this.C = C;
             this.startRow = startRow;
             this.endRow = endRow;
+            this.tempMatrixProduct = new ArrayList<>(); // Initialize tempMatrixProduct
         }
 
         @Override
@@ -45,7 +46,44 @@ public class MatrixMultiplication {
     both p and r are even numbers
     */
     public static List<List<Integer>> ParallelizeMatMul(List<List<Integer>> matrix_A, List<List<Integer>> matrix_B){
-        
+        int p = matrix_A.size();
+        int q = matrix_A.get(0).size();
+        int r = matrix_B.get(0).size();
+
+        int[][] A = matrix_A.stream().map(u -> u.stream().mapToInt(i -> i).toArray()).toArray(int[][]::new);
+        int[][] B = matrix_B.stream().map(u -> u.stream().mapToInt(i -> i).toArray()).toArray(int[][]::new);
+        int[][] C = new int[p][r];
+
+        Thread thread1 = new Thread(new BlockMultiplier(A, B, C, 0, p / 4));
+        Thread thread2 = new Thread(new BlockMultiplier(A, B, C, p / 4, p/2));
+        Thread thread3 = new Thread(new BlockMultiplier(A, B, C, p / 2, 3 * p / 4));
+        Thread thread4 = new Thread(new BlockMultiplier(A, B, C, 3 * p / 4, p));
+
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+            thread3.join();
+            thread4.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        List<List<Integer>> result = new ArrayList<>();
+        for (int[] row : C) {
+            List<Integer> listRow = new ArrayList<>();
+            for (int value : row) {
+                listRow.add(value);
+            }
+            result.add(listRow);
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {
