@@ -23,10 +23,18 @@ public class TaskScheduler
 
         @Override
         public void run() {
-            /*
-            TODO
-                Simulate utilizing CPU by sleeping the thread for the specified processingTime
-             */
+            try {
+                Thread.sleep(processingTime);
+            }catch (InterruptedException e) {
+                System.out.println("exception");
+            }
+        }
+
+        public int getTime() {
+            return processingTime;
+        }
+        public String getName() {
+            return taskName;
         }
     }
 
@@ -34,13 +42,32 @@ public class TaskScheduler
     {
         ArrayList<String> finishedTasks = new ArrayList<>();
 
-        /*
-        TODO
-            Create a thread for each given task, And then start them based on which task has the highest priority
-            (highest priority belongs to the tasks that take more time to be completed).
-            You have to wait for each task to get done and then start the next task.
-            Don't forget to add each task's name to the finishedTasks after it's completely finished.
-         */
+
+        // Sort tasks based on their estimated time
+        tasks.sort((t1, t2) -> t2.getTime() - t1.getTime());
+
+
+        for(Task task : tasks) {
+
+            // Create a thread for the task
+            Thread thread = new Thread(() -> {
+                task.run();
+            });
+
+            // Start the thread
+            thread.start();
+
+            // Wait for the thread to finish
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // Add finished task name to list
+            finishedTasks.add(task.getName());
+
+        }
 
         return finishedTasks;
     }
