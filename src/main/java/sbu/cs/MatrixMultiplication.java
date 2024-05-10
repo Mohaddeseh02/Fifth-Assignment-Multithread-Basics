@@ -6,6 +6,8 @@ import java.util.List;
 public class MatrixMultiplication {
 
     // You are allowed to change all code in the BlockMultiplier class
+
+    // کلاس BlockMultiplier برای ضرب ماتریس در چندین ترد استفاده می شود
     public static class BlockMultiplier implements Runnable
     {
         private final int[][] A;
@@ -14,6 +16,9 @@ public class MatrixMultiplication {
         private final int startRow;
         private final int endRow;
         List<List<Integer>> tempMatrixProduct;
+
+
+        // سازنده کلاس BlockMultiplier
         public BlockMultiplier(int[][] A, int[][] B, int[][] C, int startRow, int endRow) {
             this.A = A;
             this.B = B;
@@ -23,6 +28,7 @@ public class MatrixMultiplication {
             this.tempMatrixProduct = new ArrayList<>(); // Initialize tempMatrixProduct
         }
 
+        // تابع run که در آن ضرب ماتریس انجام می شود
         @Override
         public void run() {
             for (int i = startRow; i < endRow; i++) {
@@ -54,17 +60,19 @@ public class MatrixMultiplication {
         int[][] B = matrix_B.stream().map(u -> u.stream().mapToInt(i -> i).toArray()).toArray(int[][]::new);
         int[][] C = new int[p][r];
 
+        // ایجاد چهار ترد برای ضرب ماتریس
         Thread thread1 = new Thread(new BlockMultiplier(A, B, C, 0, p / 4));
         Thread thread2 = new Thread(new BlockMultiplier(A, B, C, p / 4, p/2));
         Thread thread3 = new Thread(new BlockMultiplier(A, B, C, p / 2, 3 * p / 4));
         Thread thread4 = new Thread(new BlockMultiplier(A, B, C, 3 * p / 4, p));
 
-
+        // شروع ترد ها
         thread1.start();
         thread2.start();
         thread3.start();
         thread4.start();
 
+        // انتظار تا ترد ها کار خود را تمام کنند
         try {
             thread1.join();
             thread2.join();
@@ -74,6 +82,7 @@ public class MatrixMultiplication {
             e.printStackTrace();
         }
 
+        // تبدیل ماتریس نهایی به فرمت لیست
         List<List<Integer>> result = new ArrayList<>();
         for (int[] row : C) {
             List<Integer> listRow = new ArrayList<>();
